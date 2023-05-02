@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Shift } from './shift';
 import { ShiftsService } from './shift.service';
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-root',
@@ -9,28 +10,70 @@ import { ShiftsService } from './shift.service';
 })
 
 export class AppComponent implements OnInit {
+  shiftForm!: FormGroup;
   shifts: Shift[] = [];
-  newShift: Shift = new Shift();
   currentYear: number = new Date().getFullYear();
-  currentDate: Date = new Date();
 
-  constructor(private shiftsService: ShiftsService) {
-  }
+  constructor(
+    private formBuilder: FormBuilder,
+    private shiftsService: ShiftsService
+  ) {}
 
   ngOnInit() {
+    this.buildForm();
     this.loadShifts();
-    this.currentYear =  new Date().getFullYear();
+  }
+
+  buildForm() {
+    this.shiftForm = this.formBuilder.group({
+      name: ['', Validators.required],
+      year: [this.currentYear, Validators.required],
+      startHour: ['', Validators.required],
+      endHour: ['', Validators.required],
+      hourlyRate: ['', Validators.required]
+    }, { validator: this.validateHours });
+  }
+
+  validateHours(formGroup: FormGroup) {
+    const startHour = formGroup.get('startHour')?.value;
+    const endHour = formGroup.get('endHour')?.value;
+
+    if (startHour && endHour) {
+      const startTime = new Date(`01/01/2000 ${startHour}`);
+      const endTime = new Date(`01/01/2000 ${endHour}`);
+
+      if (endTime < startTime) {
+        formGroup.get('endHour')?.setErrors({ beforeStartHour: true });
+      } else {
+        formGroup.get('endHour')?.setErrors(null);
+      }
+    }
   }
 
   calculateShift() {
-    // Perform shift calculation based on input values
-    // Update newShift object with calculated results
-    this.newShift.duration = this.calculateDuration(this.newShift.startHour, this.newShift.endHour);
-    this.newShift.salaryByDay = this.calculateSalaryByDay(this.newShift.duration, this.newShift.hourlyRate);
+    if (this.shiftForm.invalid) {
+      return;
+    }
 
-    // Add newShift to shifts array
-    this.shiftsService.addShift(this.newShift);
-    this.newShift = new Shift();
+    const shift: Shift = {
+      name: this.shiftForm.value.name,
+      year: this.shiftForm.value.year,
+      startHour: this.shiftForm.value.startHour,
+      endHour: this.shiftForm.value.endHour,
+      hourlyRate: this.shiftForm.value.hourlyRate,
+      duration: 0,
+      salaryByDay: 0
+    };
+
+    // Perform shift calculation based on input values
+    shift.duration = this.calculateDuration(shift.startHour, shift.endHour);
+    shift.salaryByDay = this.calculateSalaryByDay(shift.duration, shift.hourlyRate);
+
+    // Add shift to shifts array
+    this.shiftsService.addShift(shift);
+
+    // Reset the form
+    this.shiftForm.reset();
   }
 
   calculateDuration(startHour: string, endHour: string): number {
@@ -62,11 +105,6 @@ export class AppComponent implements OnInit {
     return this.shifts.reduce((total, shift) => total + shift.salaryByDay, 0);
   }
 
-  calculateTotalSalaryByMonth(): number {
-    // Calculate the total salary by multiplying the total salary by day by the number of days in a month (considering 30 days in a month)
-    const totalSalaryByDay = this.calculateTotalSalaryByDay();
-    return totalSalaryByDay * 30;
-  }
 
 }
 
