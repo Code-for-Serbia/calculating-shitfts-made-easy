@@ -3,10 +3,18 @@ import { Shift } from './shift';
 import { ShiftsService } from './shift.service';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
+import { DatetimeAdapter, FdDate, FdDatetimeAdapter } from '@fundamental-ngx/core/datetime';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  providers: [
+    {
+      provide: DatetimeAdapter,
+      useClass: FdDatetimeAdapter
+    }
+  ]
 })
 
 export class AppComponent implements OnInit {
