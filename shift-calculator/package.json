@@ -24,6 +24,8 @@
     "@fundamental-ngx/i18n": "0.40.3",
     "@sap-theming/theming-base-content": "^11.3.0",
     "fundamental-styles": "0.28.3",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.28",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

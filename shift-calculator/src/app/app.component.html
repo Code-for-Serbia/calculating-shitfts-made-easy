@@ -43,8 +43,10 @@
     </fd-layout-panel-body>
     <fd-layout-panel-footer>
       <div *ngIf="shifts.length > 0">
+        <button fd-button (click)="exportTableToPDF()">Export to PDF</button>
+
         <h4>Previous Shifts:</h4>
-        <table fd-table aria-label="With Toolbar"  fdType="transparent" >
+        <table fd-table aria-label="With Toolbar"  fdType="transparent"  #shiftsTable>
           <thead fd-table-head>
           <tr fd-table-row>
             <th fd-table-cell>Name</th>

@@ -3,6 +3,11 @@ import { Shift } from './shift';
 import { ShiftsService } from './shift.service';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
+import {  ElementRef, ViewChild } from '@angular/core';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+
 import { DatetimeAdapter, FdDate, FdDatetimeAdapter } from '@fundamental-ngx/core/datetime';
 
 @Component({
@@ -21,6 +26,10 @@ export class AppComponent implements OnInit {
   shiftForm!: FormGroup;
   shifts: Shift[] = [];
   currentYear: number = new Date().getFullYear();
+
+
+  @ViewChild('shiftsTable')
+  shiftsTable: ElementRef | undefined;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -112,6 +121,20 @@ export class AppComponent implements OnInit {
     // Calculate the total salary by summing up the salary by day for all shifts
     return this.shifts.reduce((total, shift) => total + shift.salaryByDay, 0);
   }
+
+  exportTableToPDF() {
+    const doc = new jsPDF();
+    // @ts-ignore
+    const table = this.shiftsTable.nativeElement;
+
+    // Generate PDF using jsPDF and jsPDF autotable plugin
+    // @ts-ignore
+    doc.autoTable({ html: table });
+
+    // Save the PDF file
+    doc.save('shifts.pdf');
+  }
+
 
 
 }
